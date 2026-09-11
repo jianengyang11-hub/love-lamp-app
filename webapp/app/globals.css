@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink text-txt;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply bg-ink2 border border-line text-txt rounded-xl px-3 py-2.5 outline-none;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-rose;
+  }
+
+  ::selection {
+    background: #ff5c8a55;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply block w-full rounded-xl border-0 px-4 py-3 font-semibold text-center
+      bg-rose text-[#2a0a14] cursor-pointer transition active:scale-[.985]
+      disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-txt border border-line font-medium;
+  }
+
+  .card {
+    @apply bg-ink2 border border-line rounded-2xl p-5;
+  }
+
+  .label {
+    @apply block text-xs uppercase tracking-wide text-mut mb-1.5 mt-4 first:mt-0;
+  }
+
+  .hint {
+    @apply text-xs text-mut mt-2;
+  }
+
+  .field {
+    @apply w-full;
+  }
+}

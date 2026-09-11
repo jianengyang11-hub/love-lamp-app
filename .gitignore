@@ -1,0 +1,6 @@
+build/
+*.ino.bin
+*.ino.elf
+*.ino.map
+*.bin
+!firmware/firmware.bin

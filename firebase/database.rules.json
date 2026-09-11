@@ -1,0 +1,150 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "devices": {
+      "$mac": {
+        ".read": "auth != null && ((auth.token.phone_number != null && data.child('userId').val() == auth.uid) || data.child('authUid').val() == auth.uid)",
+
+        ".write": "auth != null && $mac.matches(/^[0-9A-F]{12}$/) && (
+          !data.exists() ||
+          data.child('authUid').val() == auth.uid ||
+          (auth.token.phone_number != null && data.child('userId').val() == auth.uid)
+        )",
+
+        "mac": {
+          ".validate": "newData.isString() && newData.val() == $mac"
+        },
+        "authUid": {
+          ".validate": "newData.isString() && newData.val().length > 0 && (!data.parent().exists() ? newData.val() == auth.uid : newData.val() == data.val())"
+        },
+        "userId": {
+          ".validate": "newData.val() == null || (newData.isString() && (data.val() == null ? (auth.token.phone_number != null && newData.val() == auth.uid) : newData.val() == data.val()))"
+        },
+        "pairId": {
+          ".validate": "newData.val() == null || (newData.isString() && (data.val() == null || data.val() == newData.val()) && root.child('pairs').child(newData.val()).exists())"
+        },
+        "role": {
+          ".validate": "newData.val() == null || ((newData.val() == 'A' || newData.val() == 'B') && (data.val() == null || data.val() == newData.val()))"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+        },
+        "lastSeenAt": {
+          ".validate": "newData.val() == now"
+        },
+        "createdAt": {
+          ".validate": "!data.parent().exists() ? newData.val() == now : newData.val() == data.val()"
+        },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "userDevices": {
+      "$uid": {
+        ".read": "auth != null && auth.token.phone_number != null && auth.uid == $uid",
+        ".write": "auth != null && auth.token.phone_number != null && auth.uid == $uid",
+        "$mac": {
+          ".validate": "$mac.matches(/^[0-9A-F]{12}$/) && (
+            newData.val() == null ||
+            (newData.val() == true && root.child('devices').child($mac).child('userId').val() == $uid)
+          )"
+        }
+      }
+    },
+
+    "pairs": {
+      "$pairId": {
+        ".read": "auth != null && (
+          (auth.token.phone_number != null && (data.child('ownerId').val() == auth.uid || data.child('partnerId').val() == auth.uid)) ||
+          data.child('deviceAuthA').val() == auth.uid ||
+          data.child('deviceAuthB').val() == auth.uid
+        )",
+
+        ".write": "auth != null && (
+          (!data.exists() && auth.token.phone_number != null && newData.child('ownerId').val() == auth.uid) ||
+          (data.exists() && auth.token.phone_number != null && (data.child('ownerId').val() == auth.uid || data.child('partnerId').val() == auth.uid)) ||
+          (data.exists() && data.child('deviceAuthA').val() == null && newData.child('deviceAuthA').val() == auth.uid) ||
+          (data.exists() && data.child('deviceAuthB').val() == null && newData.child('deviceAuthB').val() == auth.uid)
+        )",
+
+        "pairCode": {
+          ".validate": "newData.isString() && newData.val().matches(/^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{8}$/) && (!data.exists() || newData.val() == data.val())"
+        },
+        "ownerId": {
+          ".validate": "newData.isString() && (!data.exists() || newData.val() == data.val())"
+        },
+        "partnerId": {
+          ".validate": "newData.val() == null || (newData.isString() && data.val() == null && newData.val() == auth.uid && newData.val() != data.parent().child('ownerId').val())"
+        },
+        "deviceAuthA": {
+          ".validate": "newData.val() == null || (newData.isString() && data.val() == null && newData.val() == auth.uid)"
+        },
+        "deviceAuthB": {
+          ".validate": "newData.val() == null || (newData.isString() && data.val() == null && newData.val() == auth.uid)"
+        },
+        "deviceNameA": {
+          ".validate": "newData.val() == null || (newData.isString() && newData.val().length <= 40)"
+        },
+        "deviceNameB": {
+          ".validate": "newData.val() == null || (newData.isString() && newData.val().length <= 40)"
+        },
+        "createdAt": {
+          ".validate": "!data.exists() ? newData.val() == now : newData.val() == data.val()"
+        },
+        "updatedAt": {
+          ".validate": "newData.val() == null || newData.val() == now"
+        },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "pairCodes": {
+      "$code": {
+        ".read": "auth != null && auth.token.phone_number != null",
+
+        ".write": "auth != null && auth.token.phone_number != null && (
+          (!data.exists() && newData.exists()) ||
+          (data.exists() && !newData.exists() && root.child('pairs').child(data.val()).child('ownerId').val() == auth.uid)
+        )",
+
+        ".validate": "!newData.exists() || ($code.matches(/^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{8}$/) && newData.isString() && root.child('pairs').child(newData.val()).child('pairCode').val() == $code)"
+      }
+    },
+
+    "lamp_sync": {
+      "$pairId": {
+        "$role": {
+          ".read": "auth != null && (
+            (auth.token.phone_number != null && (
+              root.child('pairs').child($pairId).child('ownerId').val() == auth.uid ||
+              root.child('pairs').child($pairId).child('partnerId').val() == auth.uid
+            )) ||
+            root.child('pairs').child($pairId).child('deviceAuthA').val() == auth.uid ||
+            root.child('pairs').child($pairId).child('deviceAuthB').val() == auth.uid
+          )",
+
+          ".write": "auth != null && (
+            ($role == 'A' && auth.token.phone_number != null && root.child('pairs').child($pairId).child('ownerId').val() == auth.uid) ||
+            ($role == 'B' && auth.token.phone_number != null && root.child('pairs').child($pairId).child('partnerId').val() == auth.uid) ||
+            ($role == 'A' && root.child('pairs').child($pairId).child('deviceAuthA').val() == auth.uid) ||
+            ($role == 'B' && root.child('pairs').child($pairId).child('deviceAuthB').val() == auth.uid)
+          )",
+
+          "deviceId": { ".validate": "newData.val() == null || newData.isString()" },
+          "power": { ".validate": "newData.isBoolean()" },
+          "color": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+          "bright": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 255" },
+          "mood": { ".validate": "newData.isString() && (newData.val() == 'normal' || newData.val() == 'miss' || newData.val() == 'sleep' || newData.val() == 'work' || newData.val() == 'hug')" },
+          "note": { ".validate": "newData.isString() && newData.val().length <= 96" },
+          "vib": { ".validate": "newData.isBoolean()" },
+          "track": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 255" },
+          "alert": { ".validate": "newData.isString() && newData.val().length <= 64" },
+          "updatedAt": { ".validate": "newData.val() == now" },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "love-lamp-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Account, device registration, pairing and live dashboard for the ESP32 Love Lamp - Firebase backend, static export for Cloudflare Pages.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "npx serve@latest out",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "firebase": "^10.13.1",
+    "next": "^14.2.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.13",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4"
+  }
+}
